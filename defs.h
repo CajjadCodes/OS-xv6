@@ -9,6 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct systrace;
 
 // bio.c
 void            binit(void);
@@ -120,6 +121,13 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int             getchilds(int, int*, int);
+int             is_tracing_syscalls(void);
+void            reset_syscalls_trace(void);
+void            update_syscalls_trace_names(void);
+void            set_tracing_syscalls(int);
+void            get_syscalls_struct(struct systrace*);
+void            add_syscall_trace(int, int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

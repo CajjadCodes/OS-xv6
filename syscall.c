@@ -103,6 +103,10 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_get_children(void);
+extern int sys_trace_syscalls(void);
+extern int sys_get_syscallstrace(void);
+extern int sys_reverse_number(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -126,6 +130,10 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_get_children]  sys_get_children,
+[SYS_trace_syscalls] sys_trace_syscalls,
+[SYS_get_syscallstrace] sys_get_syscallstrace,
+[SYS_reverse_number]	sys_reverse_number,
 };
 
 void
@@ -137,6 +145,12 @@ syscall(void)
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
+    if (is_tracing_syscalls())
+    {
+      add_syscall_trace(curproc->pid, num);
+      if (num == SYS_fork || num == SYS_exec)
+        update_syscalls_trace_names();
+    }
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);

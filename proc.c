@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "syscalltrace.h"
 
 struct {
   struct spinlock lock;
@@ -530,5 +531,69 @@ procdump(void)
         cprintf(" %p", pc[i]);
     }
     cprintf("\n");
+  }
+}
+
+int 
+getchilds(int pid, int* retchilds, int maxchilds)
+{
+  int childsno = 0;
+  for (int i = 0; (i < NPROC) && (childsno < maxchilds) ; i++) {
+    if (ptable.proc[i].parent->pid == pid) {
+      retchilds[childsno] = ptable.proc[i].pid;
+      childsno++;
+    }
+  }
+  return childsno;
+}
+
+int tracing_syscalls = 0;
+struct systrace syscallstrace[NPROC];
+
+int
+is_tracing_syscalls(void)
+{
+  return tracing_syscalls;
+}
+
+void
+set_tracing_syscalls(int new_state)
+{
+  tracing_syscalls = new_state;
+}
+
+void
+reset_syscalls_trace(void)
+{
+  for (int i = 0; i < NPROC; i++) {
+    safestrcpy(syscallstrace[i].pname, "\0", 16);
+    syscallstrace[i].pid = -1;
+    for (int j = 0; j < LASTSYSCALLIDX; j++) {
+      syscallstrace[i].syscallusage[j] = 0;
+    }
+  }
+}
+
+void
+update_syscalls_trace_names(void)
+{
+  for (int i = 0; i < NPROC; i++) {
+    safestrcpy(syscallstrace[i].pname, ptable.proc[i].name, sizeof(syscallstrace[i].pname));
+    syscallstrace[i].pid = ptable.proc[i].pid;
+  }
+}
+
+void
+get_syscalls_struct(struct systrace* systracebuffer)
+{
+  memmove(systracebuffer, syscallstrace, NPROC * sizeof(*syscallstrace));
+}
+
+void
+add_syscall_trace(int pid, int syscallid){
+  for (int i = 0; i < NPROC; i++) {
+    if (syscallstrace[i].pid == pid) {
+      syscallstrace[i].syscallusage[syscallid]++;
+    }
   }
 }
