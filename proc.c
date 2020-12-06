@@ -6,9 +6,6 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <time.h>
 
 struct
 {
@@ -334,10 +331,25 @@ int wait(void)
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
 
+int 
+getRandom()
+{
+  int random = 1, randomDevotee = 1;
+  struct proc *p;
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    randomDevotee *= p->arrivalTime * p->pid * p->waitingCycle * (int)p->rank;
+    if (randomDevotee != 0)
+      random = randomDevotee;
+    else
+      randomDevotee = random;
+  }
+  return random;
+}
+
 struct proc* lottery(struct proc** lvl2,int allTickets)
 {
-    srand(time(0));
-    int a=rand()%allTickets;
+    int a=getRandom()%allTickets;
     int s=0;
     for(int i=0;i<NPROC;i++)
     {
@@ -698,7 +710,43 @@ setSystemParameters(int priorityRatio, int arrivalTimeRatio, int executedCycleRa
 }
 
 void
+getStateString(enum procstate state, char* stringOut, int n)
+{
+
+  if (state == UNUSED)
+    safestrcpy("UNUSED", stringOut, n);
+  else if (state == EMBRYO)
+    safestrcpy("EMBRYO", stringOut, n);
+  else if (state == SLEEPING)
+    safestrcpy("SLEEPING", stringOut, n);
+  else if (state == RUNNABLE)
+    safestrcpy("RUNNABLE", stringOut, n);
+  else if (state == RUNNING)
+    safestrcpy("RUNNING", stringOut, n);
+  else if (state == ZOMBIE)
+    safestrcpy("ZOMBIE", stringOut, n);
+
+}
+
+void
 showInfo()
 {
-  cprintf("hello\n");
+  char stateString[15];
+
+  cprintf("name\tpid\tstate\tticket\tlevel\tpriorityRatio\tarrivalTimeRatio\texecutedCycleRatio\trank\texecutedCycle");
+  cprintf("-------------------------------------------------------------------------------------",
+    "------------------------------------");
+  struct proc *p;
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state == UNUSED)
+      continue;
+
+    getStateString(p->state, stateString, 15);
+
+    cprintf("%s\t%d\t%s\t%d\t%d\t", p->name, p->pid, stateString, p->ticket, p->level);
+    cprintf("%d\t%d\t%d\t", p->priorityRatio, p->arrivalTimeRatio, p->executedCycleRatio);
+    cprintf("%f\tf", p->rank, p->executedCycle);
+  }
+
 }
