@@ -799,6 +799,5 @@ showInfo()
     cprintf("%d  %d  %d  ", p->priorityRatio, p->arrivalTimeRatio, p->executedCycleRatio);
     cprintf("%d.%d %d.%d\n", (int)p->rank,  (int)(1000*p->rank - 1000*((int)p->rank)), (int)p->executedCycle,(int)(1000*p->executedCycle - 1000*((int)p->executedCycle)));
   }
-
-  cprintf("\n\n\n%d\n\n", ticks);
+  cprintf("\n");
 }
