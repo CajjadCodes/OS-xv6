@@ -28,7 +28,7 @@ int default_level = 2;
 void
 setProcessRank(struct proc* p)
 {
-  p->rank = (1/p->ticket) * p->priorityRatio + p->arrivalTime * p->arrivalTimeRatio + p->executedCycle * p->executedCycleRatio;
+  p->rank = p->priority * p->priorityRatio + p->arrivalTime * p->arrivalTimeRatio + p->executedCycle * p->executedCycleRatio;
 }
 
 void
@@ -41,7 +41,7 @@ setDefaultSchedulingValues(struct proc* p)
   p->arrivalTime = ticks; //not sure
   p->executedCycle = 0;
   p->ticket = default_ticket;
-  p->priority = 1 / p->ticket;;
+  p->priority = 1 / p->ticket;
   p->waitingCycle = 0;
   p->level = default_level;
 }
@@ -721,7 +721,10 @@ setTicket(int pid, int ticket)
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
     if (p->pid == pid)
+    {
       p->ticket = ticket;
+      p->priority = 1 / ticket;
+    }
   }
 }
 
@@ -736,6 +739,7 @@ setProcessParameters(int pid, int priorityRatio, int arrivalTimeRatio, int execu
       p->priorityRatio = priorityRatio;
       p->arrivalTimeRatio = arrivalTimeRatio;
       p->executedCycleRatio = executedCycleRatio;
+      p->rank = p->priority * p->priorityRatio + p->arrivalTime * p->arrivalTimeRatio + p->executedCycle * p->executedCycleRatio;
     }
   }
 }
@@ -749,6 +753,7 @@ setSystemParameters(int priorityRatio, int arrivalTimeRatio, int executedCycleRa
     p->priorityRatio = priorityRatio;
     p->arrivalTimeRatio = arrivalTimeRatio;
     p->executedCycleRatio = executedCycleRatio;
+    p->rank = p->priority * p->priorityRatio + p->arrivalTime * p->arrivalTimeRatio + p->executedCycle * p->executedCycleRatio;
   }
 
   //changing default rations as well
