@@ -28,7 +28,7 @@ int default_level = 2;
 void
 setProcessRank(struct proc* p)
 {
-  p->rank = p->priority * p->priorityRatio + p->arrivalTime * p->arrivalTimeRatio + p->executedCycle * p->executedCycleRatio;
+   p->rank = p->priority * p->priorityRatio + p->arrivalTime * p->arrivalTimeRatio + p->executedCycle * p->executedCycleRatio;
 }
 
 void
@@ -38,7 +38,7 @@ setDefaultSchedulingValues(struct proc* p)
   p->priorityRatio = default_priorityRatio;
   p->arrivalTimeRatio = default_arrivalTimeRatio;
   p->executedCycleRatio = default_executedCycleRatio;
-  p->arrivalTime = ticks; //not sure
+  p->arrivalTime = ticks; 
   p->executedCycle = 0;
   p->ticket = default_ticket;
   p->priority = 1 / p->ticket;
@@ -797,7 +797,8 @@ showInfo()
     getStateString(p->state, stateString, 10);
     cprintf("%s  %d  %s  %d  %d  ", p->name, p->pid, stateString, p->ticket, p->level);
     cprintf("%d  %d  %d  ", p->priorityRatio, p->arrivalTimeRatio, p->executedCycleRatio);
-    cprintf("%f %f\n", p->rank, p->executedCycle);
+    cprintf("%d.%d %d.%d\n", (int)p->rank,  (int)(1000*p->rank - 1000*((int)p->rank)), (int)p->executedCycle,(int)(1000*p->executedCycle - 1000*((int)p->executedCycle)));
   }
 
+  cprintf("\n\n\n%d\n\n", ticks);
 }
