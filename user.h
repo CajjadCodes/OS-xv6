@@ -1,6 +1,5 @@
 struct stat;
 struct rtcdate;
-struct systrace;
 
 // system calls
 int fork(void);
@@ -24,10 +23,11 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-void get_children(int, int);
-void trace_syscalls(int);
-int get_syscallstrace(struct systrace*);
-int reverse_number(void);
+void changeQueue(int, int);
+void setTicket(int, int);
+void setProcessParameters(int, int, int, int);
+void setSystemParameters(int, int, int);
+void showInfo(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

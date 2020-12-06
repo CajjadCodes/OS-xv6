@@ -189,28 +189,11 @@ struct {
 #define C(x)  ((x)-'@')  // Control-x
 
 void
-printer(char c)
-{
-  if(c != 0 && input.e-input.r < INPUT_BUF){
-    c = (c == '\r') ? '\n' : c;
-    input.buf[input.e++ % INPUT_BUF] = c;
-    consputc(c);
-    if(c == '\n' || c == C('D') || input.e == input.r+INPUT_BUF){
-      input.w = input.e;
-      wakeup(&input.r);
-    }
-  }
-}
-
-char clipboard[2000];
-//char clipboard[100];
-void
 consoleintr(int (*getc)(void))
 {
   int c, doprocdump = 0;
 
   acquire(&cons.lock);
-  int i;
   while((c = getc()) >= 0){
     switch(c){
     case C('P'):  // Process listing.
@@ -230,68 +213,6 @@ consoleintr(int (*getc)(void))
         consputc(BACKSPACE);
       }
       break;
-    case C('C'):{
-      i=0;
-      int E=input.e;
-      while(input.e != input.w &&
-            input.buf[(input.e-1) % INPUT_BUF] != '\n'){
-        clipboard[i]=input.buf[(input.e-1) % INPUT_BUF];
-        i++;
-        input.e--;
-        //consputc(BACKSPACE);
-      }
-      input.e=E;
-      char _s;
-      for(int j=0;j<i/2;j++)
-      {
-        _s=clipboard[j];
-        clipboard[j]=clipboard[i-j-1];
-        clipboard[i-j-1]=_s;
-      }
-      clipboard[i+1]=0;
-      break;
-    }
-    case C('X'):{
-      i=0;
-      //int j=0;
-      while(input.e != input.w &&
-            input.buf[(input.e-1) % INPUT_BUF] != '\n'){
-        clipboard[i]=input.buf[(input.e-1) % INPUT_BUF];
-        i++;
-        input.e--;
-        consputc(BACKSPACE);
-      }
-      char _s;
-      for(int j=0;j<i/2;j++)
-      {
-        _s=clipboard[j];
-        clipboard[j]=clipboard[i-j-1];
-        clipboard[i-j-1]=_s;
-      }
-      clipboard[i+1]=0;
-      break;
-    }
-    case C('V'):{
-      int j=0;
-      while(clipboard[j] != 0){
-        printer(clipboard[j]);
-        j++;
-      }
-      break;      
-    }
-    case C('B'):{
-      while(input.e != input.w &&
-            input.buf[(input.e-1) % INPUT_BUF] != '\n'){
-        input.e--;
-        consputc(BACKSPACE);
-      }
-      int j=0;
-      while(clipboard[j] != 0){
-        printer(clipboard[j]);
-        j++;
-      }
-      break;
-    }
     default:
       if(c != 0 && input.e-input.r < INPUT_BUF){
         c = (c == '\r') ? '\n' : c;

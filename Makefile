@@ -180,12 +180,12 @@ UPROGS=\
 	_stressfs\
 	_usertests\
 	_wc\
-	_lcm\
 	_zombie\
-	_ugetchild\
-	_printsyscalls\
-	_usetsystrace\
-	_uReverseNum\
+	_changeQueue\
+	_setTicket\
+	_setProcessParameters\
+	_setSystemParameters\
+	_showInfo\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -255,8 +255,9 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c lcm.c ugetchild.c printsyscalls.c usetsystrace.c\
-	uReverseNum.c\
+	changeQueue.c setTicket.c setProcessParameters.c\
+	setSystemParameters.c showInfo.c\
+	printf.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 
