@@ -23,7 +23,7 @@ int default_priorityRatio = 1;
 float default_arrivalTimeRatio = 1;
 float default_executedCycleRatio = 1;
 int default_ticket = 10;
-int default_level = 1;
+int default_level = 2;
 
 void
 setProcessRank(struct proc* p)
@@ -179,6 +179,7 @@ void userinit(void)
   acquire(&ptable.lock);
 
   setDefaultSchedulingValues(p);
+  p->level = 1;
   p->state = RUNNABLE;
 
   release(&ptable.lock);
