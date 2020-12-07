@@ -19,6 +19,34 @@ int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
 
+int default_priorityRatio = 1;
+float default_arrivalTimeRatio = 1;
+float default_executedCycleRatio = 1;
+int default_ticket = 10;
+int default_level = 1;
+
+void
+setProcessRank(struct proc* p)
+{
+  p->rank = (1/p->ticket) * p->priorityRatio + p->arrivalTime * p->arrivalTimeRatio + p->executedCycle * p->executedCycleRatio;
+}
+
+void
+setDefaultSchedulingValues(struct proc* p)
+{
+
+  p->priorityRatio = default_priorityRatio;
+  p->arrivalTimeRatio = default_arrivalTimeRatio;
+  p->executedCycleRatio = default_executedCycleRatio;
+  p->arrivalTime = ticks; //not sure
+  p->executedCycle = 0;
+  p->ticket = default_ticket;
+  p->priority = 1 / p->ticket;;
+  p->waitingCycle = 0;
+  p->level = default_level;
+}
+
+
 static void wakeup1(void *chan);
 
 void pinit(void)
@@ -150,6 +178,7 @@ void userinit(void)
   // because the assignment might not be atomic.
   acquire(&ptable.lock);
 
+  setDefaultSchedulingValues(p);
   p->state = RUNNABLE;
 
   release(&ptable.lock);
@@ -220,6 +249,7 @@ int fork(void)
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
+  setDefaultSchedulingValues(np);
 
   release(&ptable.lock);
 
@@ -360,6 +390,7 @@ struct proc* lottery(struct proc** lvl2,int allTickets)
     return lvl2[0];
 }
 
+
 struct proc* choose(/*struct ptable ptable*/)
 {
   int j, tckts;
@@ -385,7 +416,7 @@ struct proc* choose(/*struct ptable ptable*/)
       tckts+=p->ticket;
       j++;
     }
-
+    setProcessRank(p);
     if(best->level>p->level)
         best=p;
     else if(best->level==p->level)
@@ -408,7 +439,7 @@ struct proc* choose(/*struct ptable ptable*/)
 void
 scheduler(void)
 {
-  struct proc *p;
+  // struct proc *p;
   struct proc *_p;
   struct cpu *c = mycpu();
   c->proc = 0;
@@ -419,7 +450,7 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       //if(p->state != RUNNABLE)
       //  continue;
 
@@ -429,7 +460,7 @@ scheduler(void)
       
       _p = choose(/*ptable*/);
       c->proc = _p;
-      switchuvm(p);
+      switchuvm(_p);
       _p->state = RUNNING;
       _p->executedCycle+=0.1;
       _p->waitingCycle-=1;
@@ -440,7 +471,7 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
-    }
+    // }
     release(&ptable.lock);
 
   }
@@ -707,6 +738,11 @@ setSystemParameters(int priorityRatio, int arrivalTimeRatio, int executedCycleRa
     p->arrivalTimeRatio = arrivalTimeRatio;
     p->executedCycleRatio = executedCycleRatio;
   }
+
+  //changing default rations as well
+  default_priorityRatio = priorityRatio;  
+  default_arrivalTimeRatio = arrivalTimeRatio;
+  default_executedCycleRatio = executedCycleRatio;
 }
 
 void
