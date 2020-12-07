@@ -430,6 +430,7 @@ struct proc* choose(/*struct ptable ptable*/)
         }
     }
   }
+  
   if(best->level!=2)
       return best;
   else
@@ -459,6 +460,7 @@ scheduler(void)
       // before jumping back to us.
       
       _p = choose(/*ptable*/);
+      // cprintf("P pid: %d\n", _p->pid);
       c->proc = _p;
       switchuvm(_p);
       _p->state = RUNNING;
@@ -467,7 +469,6 @@ scheduler(void)
 
       swtch(&(c->scheduler), _p->context);
       switchkvm();
-
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
@@ -477,41 +478,42 @@ scheduler(void)
   }
 }
 
-/*void scheduler(void)
-{
-  struct proc *p;
-  struct cpu *c = mycpu();
-  c->proc = 0;
+// void scheduler(void)
+// {
+//   struct proc *p;
+//   struct cpu *c = mycpu();
+//   c->proc = 0;
 
-  for (;;)
-  {
-    // Enable interrupts on this processor.
-    sti();
+//   for (;;)
+//   {
+//     // Enable interrupts on this processor.
+//     sti();
 
-    // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    {
-      if (p->state != RUNNABLE)
-        continue;
+//     // Loop over process table looking for process to run.
+//     acquire(&ptable.lock);
+//     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+//     {
+//       if (p->state != RUNNABLE)
+//         continue;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+//       // Switch to chosen process.  It is the process's job
+//       // to release ptable.lock and then reacquire it
+//       // before jumping back to us.
+//       c->proc = p;
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+//       switchuvm(p);
+//       p->state = RUNNING;
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-    }
-    release(&ptable.lock);
-  }
-}*/
+//       swtch(&(c->scheduler), p->context);
+//       switchkvm();
+
+//       // Process is done running for now.
+//       // It should have changed its p->state before coming back.
+//       c->proc = 0;
+//     }
+//     release(&ptable.lock);
+//   }
+// }
 
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
@@ -782,7 +784,7 @@ showInfo()
 
     cprintf("%s\t%d\t%s\t%d\t%d\t", p->name, p->pid, stateString, p->ticket, p->level);
     cprintf("%d\t%d\t%d\t", p->priorityRatio, p->arrivalTimeRatio, p->executedCycleRatio);
-    cprintf("%f\tf", p->rank, p->executedCycle);
+    cprintf("%f\t%f\n", p->rank, p->executedCycle);
   }
 
 }
