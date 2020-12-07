@@ -399,13 +399,18 @@ struct proc* choose(/*struct ptable ptable*/)
   tckts=0;
   struct proc* p;
   struct proc* best;
-  best=ptable.proc;
+  // best=ptable.proc;
+  int found_first_running = 0;
   struct proc* lvl2[NPROC];
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
-    p->waitingCycle+=1;
     if(p->state != RUNNABLE)
       continue;
+    if (found_first_running == 0) {
+      best = p;
+      found_first_running = 1;
+    }
+    p->waitingCycle+=1;
     if(p->waitingCycle>=10000)
     {
       p->waitingCycle=0;
@@ -431,7 +436,8 @@ struct proc* choose(/*struct ptable ptable*/)
         }
     }
   }
-  
+  if (found_first_running == 0)
+    return NULL;
   if(best->level!=2)
       return best;
   else
@@ -452,7 +458,8 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    // for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    // {
       //if(p->state != RUNNABLE)
       //  continue;
 
@@ -461,7 +468,10 @@ scheduler(void)
       // before jumping back to us.
       
       _p = choose(/*ptable*/);
-      // cprintf("P pid: %d\n", _p->pid);
+      if (_p == NULL) {
+            release(&ptable.lock);
+            continue;
+      }
       c->proc = _p;
       switchuvm(_p);
       _p->state = RUNNING;
@@ -475,7 +485,7 @@ scheduler(void)
       c->proc = 0;
     // }
     release(&ptable.lock);
-
+    // }
   }
 }
 
@@ -496,12 +506,11 @@ scheduler(void)
 //     {
 //       if (p->state != RUNNABLE)
 //         continue;
-
+//       cprintf("Name: %s | Level: %d\n", p->name, p->level);
 //       // Switch to chosen process.  It is the process's job
 //       // to release ptable.lock and then reacquire it
 //       // before jumping back to us.
 //       c->proc = p;
-
 //       switchuvm(p);
 //       p->state = RUNNING;
 
