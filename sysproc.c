@@ -136,5 +136,6 @@ sys_setSystemParameters(void)
 int
 sys_showInfo(void)
 {
+  showInfo();
   return 1;
 }
