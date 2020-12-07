@@ -437,7 +437,7 @@ struct proc* choose(/*struct ptable ptable*/)
     }
   }
   if (found_first_running == 0)
-    return NULL;
+    return 0;
   if(best->level!=2)
       return best;
   else
@@ -468,7 +468,7 @@ scheduler(void)
       // before jumping back to us.
       
       _p = choose(/*ptable*/);
-      if (_p == NULL) {
+      if (_p == 0) {
             release(&ptable.lock);
             continue;
       }
