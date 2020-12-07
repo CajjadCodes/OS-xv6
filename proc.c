@@ -762,17 +762,17 @@ getStateString(enum procstate state, char* stringOut, int n)
 {
 
   if (state == UNUSED)
-    safestrcpy("UNUSED", stringOut, n);
+    safestrcpy(stringOut, "UNUSED", n);
   else if (state == EMBRYO)
-    safestrcpy("EMBRYO", stringOut, n);
+    safestrcpy(stringOut, "EMBRYO", n);
   else if (state == SLEEPING)
-    safestrcpy("SLEEPING", stringOut, n);
+    safestrcpy(stringOut, "SLEEPING", n);
   else if (state == RUNNABLE)
-    safestrcpy("RUNNABLE", stringOut, n);
+    safestrcpy(stringOut, "RUNNABLE", n);
   else if (state == RUNNING)
-    safestrcpy("RUNNING", stringOut, n);
+    safestrcpy(stringOut, "RUNNING", n);
   else if (state == ZOMBIE)
-    safestrcpy("ZOMBIE", stringOut, n);
+    safestrcpy(stringOut, "ZOMBIE", n);
 
 }
 
@@ -781,20 +781,18 @@ showInfo()
 {
   char stateString[15];
 
-  cprintf("name\tpid\tstate\tticket\tlevel\tpriorityRatio\tarrivalTimeRatio\texecutedCycleRatio\trank\texecutedCycle");
-  cprintf("-------------------------------------------------------------------------------------",
-    "------------------------------------");
+  cprintf("name       pid       state       ticket      level       priorityRatio       arrivalTimeRatio      executedCycleRatio      rank      executedCycle\n");
+  cprintf("-------------------------------------------------------------------------------------\n");
   struct proc *p;
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
     if (p->state == UNUSED)
       continue;
 
-    getStateString(p->state, stateString, 15);
-
-    cprintf("%s\t%d\t%s\t%d\t%d\t", p->name, p->pid, stateString, p->ticket, p->level);
-    cprintf("%d\t%d\t%d\t", p->priorityRatio, p->arrivalTimeRatio, p->executedCycleRatio);
-    cprintf("%f\t%f\n", p->rank, p->executedCycle);
+    getStateString(p->state, stateString, 10);
+    cprintf("%s  %d  %s  %d  %d  ", p->name, p->pid, stateString, p->ticket, p->level);
+    cprintf("%d  %d  %d  ", p->priorityRatio, p->arrivalTimeRatio, p->executedCycleRatio);
+    cprintf("%f %f\n", p->rank, p->executedCycle);
   }
 
 }
